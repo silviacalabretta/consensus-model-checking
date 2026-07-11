@@ -1,0 +1,54 @@
+ctmc
+
+const int N = 10;
+const int Nhalf = N/2;
+
+const int Za;
+const int Zb;
+
+const double qa = 1.0/N;
+const double qb = 1.0/N;
+
+const int m = 0.5 * N;  // majority
+const int d = 1;        // difference
+const int t = 35;       // reaching time
+const int h = 40;       // holding_time
+
+module voter
+    a : [0..N] init Nhalf-Za;
+    b : [0..N] init Nhalf-Zb;
+    
+    [ra] (a>0) & (b>0) & (a<N) -> a*b : (a'=a+1) & (b'=b-1);    // A + B -> 2A   
+    [rb] (a>0) & (b>0) & (b<N) -> a*b : (a'=a-1) & (b'=b+1);    // A + B -> 2B
+
+    // Zealot interactions
+    [za] (b>0) & (a<N) & (Za>0) -> b*Za : (a'=a+1) & (b'=b-1);  // B + Za -> A + Za
+    [zb] (a>0) & (b<N) & (Zb>0) -> a*Zb : (a'=a-1) & (b'=b+1);  // A + Zb -> B + Zb
+
+endmodule
+
+
+// module representing the base rates of reactions
+module base_rates
+
+    [ra] true -> qa : true;
+    [rb] true -> qb : true;
+
+    [za] true -> qa : true;
+    [zb] true -> qb : true;
+
+endmodule
+
+rewards "reaching_time"
+// assigns 1 to states where no majority has yet been reached
+    !( ((a+Za >= m) & (a+Za >= b+Zb+d)) | ((b+Zb >= m) & (b+Zb >= a+Za+d)) ) : 1;
+endrewards
+
+rewards "holding_time"
+// assigns 1 to states where either A or B has majority
+    ( ((a+Za >= m) & (a+Za >= b+Zb+d)) | ((b+Zb >= m) & (b+Zb >= a+Za+d)) ) : 1;
+endrewards
+
+
+label "a_wins" = ((a+Za >= m) & (a+Za >= b+Zb+d));
+label "b_wins" = ((b+Zb >= m) & (b+Zb >= a+Za+d));
