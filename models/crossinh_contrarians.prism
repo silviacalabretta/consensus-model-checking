@@ -1,7 +1,7 @@
 ctmc
 
 const int N = 10;
-const int Nhalf = N/2;
+const int Nhalf = floor(N/2);
 
 const int C = 2;
 const int Chalf = C/2;
@@ -9,7 +9,7 @@ const int Chalf = C/2;
 const double qa = 1.0/N;
 const double qb = 1.0/N;
 
-const int m = 0.5*N;    // majority percentage
+const int m = floor(0.5 * N);  // majority
 const int d = 1;        // difference
 const int t = 35;       // reaching time
 const int h = 40;       // holding_time
@@ -60,16 +60,24 @@ module base_rates
 
 endmodule
 
+formula supp_a = a + Ca;
+formula supp_b = b + Cb;
+
+formula maj_a = ((supp_a >= m) & (supp_a >= supp_b+d));
+formula maj_b = ((supp_b >= m) & (supp_b >= supp_a+d));
+formula consensus = maj_a | maj_b;
+
 rewards "reaching_time"
-// assigns 1 to states where no majority has yet been reached
-    !( ((a+Ca >= m) & (a+Ca >= b+Cb+d)) | ((b+Cb >= m) & (b+Cb >= a+Ca+d)) ) : 1;
+// assigns 1 to states where no majority has not been reached
+    !(consensus) : 1;
 endrewards
 
 rewards "holding_time"
 // assigns 1 to states where either A or B has majority
-    ( ((a+Ca >= m) & (a+Ca >= b+Cb+d)) | ((b+Cb >= m) & (b+Cb >= a+Ca+d)) ) : 1;
+    consensus : 1;
 endrewards
 
 
-label "a_wins" = ((a+Ca >= m) & (a+Ca >= b+Cb+d));
-label "b_wins" = ((b+Cb >= m) & (b+Cb >= a+Ca+d));
+label "maj_a" = maj_a;
+label "maj_b" = maj_b;
+label "consensus" = consensus;
