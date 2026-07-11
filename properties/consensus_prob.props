@@ -1,0 +1,27 @@
+// prob of eventually reaching A majority
+P=? [F<=t "maj_a" ]
+
+// prob of eventually reaching B majority
+P=? [F<=t "maj_b" ]
+
+// prob of eventually reaching either majority
+P=? [F<=t "consensus" ]
+
+// prob of never reaching either majority
+P=? [G<=t !("consensus") ]
+
+// prob of reaching A majority first
+P=? [!("consensus") U<=t "maj_a" ]
+
+// prob of reaching B majority first
+P=? [!("consensus") U<=t "maj_b" ]
+
+// prob of reaching A majority and holding it for time h with at least 0.95 prob
+P=? [F<=t ("maj_a" & P>=0.95[G<=h "maj_a"])]
+
+// prob of reaching B majority and holding it for time h with at least 0.95 prob
+P=? [F<=t ("maj_b" & P>=0.95[G<=h "maj_b"])]
+
+// max prob of reaching B majority in t time after having reached A majority
+filter(max, P=? [F<=t "maj_b"],"maj_a")
+

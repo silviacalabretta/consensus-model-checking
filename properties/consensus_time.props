@@ -1,0 +1,3 @@
+// average waiting time until consensus
+R{"reaching_time"}=? [ F "consensus" ]
+
