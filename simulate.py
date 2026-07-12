@@ -3,10 +3,10 @@ import random
 import statistics
 import time
 from tqdm import tqdm
-from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 from util.cli_args import build_simulate_parser
+from util.simulation_types import EpisodeResult, TrajectoryStep
 from util.model_builder import (
     build_ctmc,
     get_exit_rates,
@@ -14,23 +14,7 @@ from util.model_builder import (
     get_state_variables,
     get_transitions,
 )
-
-
-@dataclass
-class TrajectoryStep:
-    time: float
-    state: int
-    labels: frozenset
-    variables: Dict[str, int]
-
-
-@dataclass
-class EpisodeResult:
-    steps: List[TrajectoryStep]
-    final_time: float
-    final_consensus_type: Optional[str]
-    consensus_time_fraction: float
-    consensus_entry_count: int
+from util.plot_utils import plot_trajectories
 
 
 def _compute_episode_stats(steps: List[TrajectoryStep], total_time: float) -> tuple:
@@ -208,21 +192,9 @@ def _print_results(
     print(f"    Median: {statistics.median(entries):.4f}")
 
     print(f"\n  Final state at t={max_time}:")
-    print(
-        f"    A-majority:   {a_count} "
-        f"({a_count / n_episodes:.4f})"
-    )
-    print(
-        f"    B-majority:   {b_count} "
-        f"({b_count / n_episodes:.4f})"
-    )
-    print(
-        f"    No consensus: {no_final} "
-        f"({no_final / n_episodes:.4f})"
-    )
-    # print(f"    A-majority:  {a_count} ({a_count/episodes:.4f})")
-    # print(f"    B-majority:  {b_count} ({b_count/episodes:.4f})")
-    # print(f"    No consensus: {no_final} ({no_final/episodes:.4f})")
+    print(f"    A-majority:   {a_count} ({a_count / n_episodes:.4f})")
+    print(f"    B-majority:   {b_count} ({b_count / n_episodes:.4f})")
+    print(f"    No consensus: {no_final} ({no_final / n_episodes:.4f})")
 
     print(f"\n  Total simulation time: {elapsed_sim:.3f}s")
 
@@ -264,20 +236,19 @@ def run_simulation(
     t0 = time.perf_counter()
 
     results: List[EpisodeResult] = []
-    # for ep in range(episodes):
     for _ in tqdm(range(n_episodes), desc="Simulating episodes", unit="episode"):
         results.append(simulate_episode(
             transitions, exit_rates, bm.model.labeling,
             var_names, var_values, initial_state,
             max_time, rng,
         ))
-        # if (ep + 1) % max(1, episodes // 10) == 0:
-        #     print(f"  {ep+1}/{episodes} done")
 
     elapsed_sim = time.perf_counter() - t0
     print(f"  Done in {elapsed_sim:.3f}s")
 
     _print_results(results, var_names, max_time, elapsed_sim)
+
+    plot_trajectories(results[0],variables=["a", "b"],shade_labels=True, save_path=f"plots/trajectory_{model_name}_s{seed}.png")
 
 
 def main():
