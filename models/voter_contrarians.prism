@@ -4,7 +4,7 @@ const int N = 10;
 const int Nhalf = floor(N/2);
 
 const int C = 2;
-const int Chalf = C/2;
+const int Chalf = floor(C/2);
 
 const double qa = 1.0/N;
 const double qb = 1.0/N;
@@ -20,35 +20,20 @@ module voter
 	Ca: [0..C] init Chalf;
 	Cb: [0..C] init Chalf;
     
-    [ra] (a>0) & (b>0) & (a<N) -> a*b : (a'=a+1) & (b'=b-1);    // A + B -> 2A   
-    [rb] (a>0) & (b>0) & (b<N) -> a*b : (a'=a-1) & (b'=b+1);    // A + B -> 2B
+    [ra] (a>0) & (b>0) & (a<N) -> qa*a*b : (a'=a+1) & (b'=b-1);    // A + B -> 2A   
+    [rb] (a>0) & (b>0) & (b<N) -> qb*a*b : (a'=a-1) & (b'=b+1);    // A + B -> 2B
 
     // Contrarians interactions: i=inhibit, r=recruit, f=flip
-    [conrb] (a>0) & (Cb>0) & (b<N) -> a*Cb : (a'=a-1) & (b'=b+1);       // A + Cb -> B + Cb
-    [confb] (a>0) & (Ca>0) & (Cb<C) -> a*Ca : (Ca'=Ca-1) & (Cb'=Cb+1);  // A + Ca -> A + Cb
-    [conra] (b>0) & (Ca>0) & (a<N) -> b*Ca : (b'=b-1) & (a'=a+1);       // B + Ca -> A + Ca  
-    [confa] (b>0) & (Cb>0) & (Ca<C) -> b*Cb : (Cb'=Cb-1) & (Ca'=Ca+1);  // B + Cb -> B + Ca
+    [conrb] (a>0) & (Cb>0) & (b<N) -> qb*a*Cb : (a'=a-1) & (b'=b+1);       // A + Cb -> B + Cb
+    [confb] (a>0) & (Ca>0) & (Cb<C) -> qa*a*Ca : (Ca'=Ca-1) & (Cb'=Cb+1);  // A + Ca -> A + Cb
+    [conra] (b>0) & (Ca>0) & (a<N) -> qa*b*Ca : (b'=b-1) & (a'=a+1);       // B + Ca -> A + Ca  
+    [confa] (b>0) & (Cb>0) & (Ca<C) -> qb*b*Cb : (Cb'=Cb-1) & (Ca'=Ca+1);  // B + Cb -> B + Ca
 
-    [confbb] (Ca>1) & (Cb<(C-1)) -> Ca*(Ca-1)/2 : (Ca'=Ca-2) & (Cb'=Cb+2);  // Ca + Ca -> Cb + Cb
-    [confaa] (Cb>1) & (Ca<(C-1)) -> Cb*(Cb-1)/2 : (Cb'=Cb-2) & (Ca'=Ca+2);  // Cb + Cb -> Ca + Ca
-
-endmodule
-
-
-// module representing the base rates of reactions
-module base_rates
-
-	[ra] true -> qa : true;
-	[rb] true -> qb : true;
-
-    [conrb] true -> qb : true;	
-    [confb] true -> qa : true;
-    [conra] true -> qa : true;
-    [confa] true -> qb : true;
-    [confbb] true -> qa : true;
-    [confaa] true -> qb : true;
+    [confbb] (Ca>1) & (Cb<(C-1)) -> qa*Ca*(Ca-1)/2 : (Ca'=Ca-2) & (Cb'=Cb+2);  // Ca + Ca -> Cb + Cb
+    [confaa] (Cb>1) & (Ca<(C-1)) -> qb*Cb*(Cb-1)/2 : (Cb'=Cb-2) & (Ca'=Ca+2);  // Cb + Cb -> Ca + Ca
 
 endmodule
+
 
 formula supp_a = a + Ca;
 formula supp_b = b + Cb;

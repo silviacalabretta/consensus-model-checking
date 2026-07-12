@@ -18,24 +18,12 @@ module voter
     a : [0..N] init Nhalf-Za;
     b : [0..N] init Nhalf-Zb;
     
-    [ra] (a>0) & (b>0) & (a<N) -> a*b : (a'=a+1) & (b'=b-1);    // A + B -> 2A   
-    [rb] (a>0) & (b>0) & (b<N) -> a*b : (a'=a-1) & (b'=b+1);    // A + B -> 2B
+    [ra] (a>0) & (b>0) & (a<N) -> qa*a*b : (a'=a+1) & (b'=b-1);    // A + B -> 2A   
+    [rb] (a>0) & (b>0) & (b<N) -> qb*a*b : (a'=a-1) & (b'=b+1);    // A + B -> 2B
 
     // Zealot interactions
-    [za] (b>0) & (a<N) & (Za>0) -> b*Za : (a'=a+1) & (b'=b-1);  // B + Za -> A + Za
-    [zb] (a>0) & (b<N) & (Zb>0) -> a*Zb : (a'=a-1) & (b'=b+1);  // A + Zb -> B + Zb
-
-endmodule
-
-
-// module representing the base rates of reactions
-module base_rates
-
-    [ra] true -> qa : true;
-    [rb] true -> qb : true;
-
-    [za] true -> qa : true;
-    [zb] true -> qb : true;
+    [za] (b>0) & (a<N) & (Za>0) -> qa*b*Za : (a'=a+1) & (b'=b-1);  // B + Za -> A + Za
+    [zb] (a>0) & (b<N) & (Zb>0) -> qb*a*Zb : (a'=a-1) & (b'=b+1);  // A + Zb -> B + Zb
 
 endmodule
 

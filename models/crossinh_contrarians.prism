@@ -4,7 +4,7 @@ const int N = 10;
 const int Nhalf = floor(N/2);
 
 const int C = 2;
-const int Chalf = C/2;
+const int Chalf = floor(C/2);
 
 const double qa = 1.0/N;
 const double qb = 1.0/N;
@@ -22,43 +22,24 @@ module cross_inhibition
 	Cb: [0..C] init Chalf;
     
     // i=inhibit, r=recruit
-    [ia] (a>0) & (b>0) & (u<N) -> a*b : (b'=b-1) & (u'=u+1);    // A + B -> A + U
-    [ib] (a>0) & (b>0) & (u<N) -> a*b : (a'=a-1) & (u'=u+1);    // A + B -> U + B
-    [ra] (a>0) & (u>0) & (a<N) -> a*u : (a'=a+1) & (u'=u-1);    // U + A -> 2A
-    [rb] (b>0) & (u>0) & (b<N) -> b*u : (b'=b+1) & (u'=u-1);    // U + B -> 2B
+    [ia] (a>0) & (b>0) & (u<N) -> qa*a*b : (b'=b-1) & (u'=u+1);    // A + B -> A + U
+    [ib] (a>0) & (b>0) & (u<N) -> qb*a*b : (a'=a-1) & (u'=u+1);    // A + B -> U + B
+    [ra] (a>0) & (u>0) & (a<N) -> qa*a*u : (a'=a+1) & (u'=u-1);    // U + A -> 2A
+    [rb] (b>0) & (u>0) & (b<N) -> qb*b*u : (b'=b+1) & (u'=u-1);    // U + B -> 2B
 
     // Contrarians interactions: f=flip
-    [conia] (a>0) & (Cb>0) & (u<N) -> a*Cb : (a'=a-1) & (u'=u+1);       // A + Cb -> U + Cb
-    [conrb] (u>0) & (Cb>0) & (b<N) -> u*Cb : (u'=u-1) & (b'=b+1);       // U + Cb -> B + Cb
-    [confb] (a>0) & (Ca>0) & (Cb<C) -> a*Ca : (Ca'=Ca-1) & (Cb'=Cb+1);  // A + Ca -> A + Cb
-    [conib] (b>0) & (Ca>0) & (u<N) -> b*Ca : (b'=b-1) & (u'=u+1);       // B + Ca -> U + Ca
-    [conra] (u>0) & (Ca>0) & (a<N) -> u*Ca : (u'=u-1) & (a'=a+1);       // U + Ca -> A + Ca  
-    [confa] (b>0) & (Cb>0) & (Ca<C) -> b*Cb : (Cb'=Cb-1) & (Ca'=Ca+1);  // B + Cb -> B + Ca
+    [conia] (a>0) & (Cb>0) & (u<N) -> qb*a*Cb : (a'=a-1) & (u'=u+1);       // A + Cb -> U + Cb
+    [conrb] (u>0) & (Cb>0) & (b<N) -> qb*u*Cb : (u'=u-1) & (b'=b+1);       // U + Cb -> B + Cb
+    [confb] (a>0) & (Ca>0) & (Cb<C) -> qa*a*Ca : (Ca'=Ca-1) & (Cb'=Cb+1);  // A + Ca -> A + Cb
+    [conib] (b>0) & (Ca>0) & (u<N) -> qa*b*Ca : (b'=b-1) & (u'=u+1);       // B + Ca -> U + Ca
+    [conra] (u>0) & (Ca>0) & (a<N) -> qa*u*Ca : (u'=u-1) & (a'=a+1);       // U + Ca -> A + Ca  
+    [confa] (b>0) & (Cb>0) & (Ca<C) -> qb*b*Cb : (Cb'=Cb-1) & (Ca'=Ca+1);  // B + Cb -> B + Ca
 
-    [confbb] (Ca>1) & (Cb<(C-1)) -> Ca*(Ca-1)/2 : (Ca'=Ca-2) & (Cb'=Cb+2);  // Ca + Ca -> Cb + Cb
-    [confaa] (Cb>1) & (Ca<(C-1)) -> Cb*(Cb-1)/2 : (Cb'=Cb-2) & (Ca'=Ca+2);  // Cb + Cb -> Ca + Ca
-
-endmodule
-
-
-// module representing the base rates of reactions
-module base_rates
-
-    [ia] true -> qa : true;
-	[ib] true -> qb : true;
-	[ra] true -> qa : true;
-	[rb] true -> qb : true;
-
-    [conia] true -> qb : true;
-    [conrb] true -> qb : true;	
-    [confb] true -> qa : true;
-    [conib] true -> qa : true;
-    [conra] true -> qa : true;
-    [confa] true -> qb : true;
-    [confbb] true -> qa : true;
-    [confaa] true -> qb : true;
+    [confbb] (Ca>1) & (Cb<(C-1)) -> qa*Ca*(Ca-1)/2 : (Ca'=Ca-2) & (Cb'=Cb+2);  // Ca + Ca -> Cb + Cb
+    [confaa] (Cb>1) & (Ca<(C-1)) -> qb*Cb*(Cb-1)/2 : (Cb'=Cb-2) & (Ca'=Ca+2);  // Cb + Cb -> Ca + Ca
 
 endmodule
+
 
 formula supp_a = a + Ca;
 formula supp_b = b + Cb;

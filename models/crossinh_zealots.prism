@@ -15,39 +15,24 @@ const int t = 35;       // reaching time
 const int h = 40;       // holding_time
 
 module cross_inhibition
-    a : [0..N] init Nhalf;
-    b : [0..N] init Nhalf;
+    a : [0..N] init Nhalf-Za;
+    b : [0..N] init Nhalf-Zb;
     u : [0..N] init 0;
     
     // i=inhibit, r=recruit
-    [ia] (a>0) & (b>0) & (u<N) -> a*b : (b'=b-1) & (u'=u+1);    // A + B -> A + U
-    [ib] (a>0) & (b>0) & (u<N) -> a*b : (a'=a-1) & (u'=u+1);    // A + B -> U + B
-    [ra] (a>0) & (u>0) & (a<N) -> a*u : (a'=a+1) & (u'=u-1);    // U + A -> 2A
-    [rb] (b>0) & (u>0) & (b<N) -> b*u : (b'=b+1) & (u'=u-1);    // U + B -> 2B
+    [ia] (a>0) & (b>0) & (u<N) -> qa*a*b : (b'=b-1) & (u'=u+1);    // A + B -> A + U
+    [ib] (a>0) & (b>0) & (u<N) -> qb*a*b : (a'=a-1) & (u'=u+1);    // A + B -> U + B
+    [ra] (a>0) & (u>0) & (a<N) -> qa*a*u : (a'=a+1) & (u'=u-1);    // U + A -> 2A
+    [rb] (b>0) & (u>0) & (b<N) -> qb*b*u : (b'=b+1) & (u'=u-1);    // U + B -> 2B
 
     // Zealot interactions
-    [zia] (a>0) & (Zb>0) & (u<N) -> a*Zb : (a'=a-1) & (u'=u+1);  // A + Zb -> U + Zb
-    [zrb] (u>0) & (Zb>0) & (b<N) -> u*Zb : (u'=u-1) & (b'=b+1);  // U + Zb -> B + Zb
-    [zib] (b>0) & (Za>0) & (u<N) -> b*Za : (b'=b-1) & (u'=u+1);  // B + Za -> U + Za
-    [zra] (u>0) & (Za>0) & (a<N) -> u*Za : (u'=u-1) & (a'=a+1);  // U + Za -> A + Za 
+    [zia] (a>0) & (Zb>0) & (u<N) -> qb*a*Zb : (a'=a-1) & (u'=u+1);  // A + Zb -> U + Zb
+    [zrb] (u>0) & (Zb>0) & (b<N) -> qb*u*Zb : (u'=u-1) & (b'=b+1);  // U + Zb -> B + Zb
+    [zib] (b>0) & (Za>0) & (u<N) -> qa*b*Za : (b'=b-1) & (u'=u+1);  // B + Za -> U + Za
+    [zra] (u>0) & (Za>0) & (a<N) -> qa*u*Za : (u'=u-1) & (a'=a+1);  // U + Za -> A + Za 
 
 endmodule
 
-
-// module representing the base rates of reactions
-module base_rates
-
-    [ia] true -> qa : true;
-	[ib] true -> qb : true;
-	[ra] true -> qa : true;
-	[rb] true -> qb : true;
-
-    [zia] true -> qb : true;
-    [zrb] true -> qb : true;
-    [zib] true -> qa : true;
-    [zra] true -> qa : true;
-
-endmodule
 
 formula supp_a = a + Za;
 formula supp_b = b + Zb;
