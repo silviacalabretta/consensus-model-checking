@@ -17,8 +17,8 @@ const int h = 40;       // holding_time
 module voter
     a : [0..N] init Nhalf-Chalf;
     b : [0..N] init Nhalf-Chalf;
-	Cx: [0..C] init cHalf;
-	Cy: [0..C] init cHalf;
+	Ca: [0..C] init Chalf;
+	Cb: [0..C] init Chalf;
     
     [ra] (a>0) & (b>0) & (a<N) -> a*b : (a'=a+1) & (b'=b-1);    // A + B -> 2A   
     [rb] (a>0) & (b>0) & (b<N) -> a*b : (a'=a-1) & (b'=b+1);    // A + B -> 2B

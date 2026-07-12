@@ -3,8 +3,8 @@ ctmc
 const int N = 10;
 const int Nhalf = floor(N/2);
 
-const int Za;
-const int Zb;
+const int Za = 2;
+const int Zb = 2;
 
 const double qa = 1.0/N;
 const double qb = 1.0/N;
