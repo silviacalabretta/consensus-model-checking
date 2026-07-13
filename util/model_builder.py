@@ -56,20 +56,20 @@ def _validate_model_params(
         if Za < 0 or Zb < 0:
             raise ValueError("Za/Zb must be non-negative")
         if Za > N // 2 or Zb > N // 2:
-            raise ValueError("Za/Zb must be <= floor(N/2) for valid initial state")
+            raise ValueError(f"Za/Zb must be <= floor(N/2) for valid initial state (N={N})")
     if "contrarian" in model_name:
         if C < 0:
             raise ValueError("C must be non-negative")
         if C > N:
-            raise ValueError("C must be <= N")
+            raise ValueError(f"C must be <= N ({N})")
 
 
 def build_ctmc(
     model_name: str,
-    N: int = 10,
+    N: int = 20,
     Za: int = 2,
     Zb: int = 2,
-    C: int = 2,
+    C: int = 4,
     t: int = 35,
     h: int = 40,
 ) -> BuiltModel:
@@ -125,13 +125,34 @@ def parse_properties_file(prop_key: str, prism_program: object) -> list:
     if not fpath.exists():
         raise FileNotFoundError(f"Properties file not found: {fpath}")
 
-    with open(fpath, "r") as f:
-        formula_str = f.read()
+    properties = []
 
-    lines = [l for l in formula_str.splitlines() if not l.strip().startswith("//")]
-    formula_str = "\n".join(lines)
+    with open(fpath, "r", encoding="utf-8") as file:
+        for line_number, line in enumerate(file, start=1):
+            formula = line.strip()
 
-    return stormpy.parse_properties_for_prism_program(formula_str, prism_program)
+            # Ignore empty lines and comment lines
+            if not formula or formula.startswith("//"):
+                continue
+
+            # A trailing semicolon is optional when parsing individually,
+            # so remove it for consistency.
+            formula = formula.removesuffix(";").strip()
+
+            try:
+                parsed = stormpy.parse_properties_for_prism_program(
+                    formula,
+                    prism_program,
+                )
+            except RuntimeError as exc:
+                raise RuntimeError(
+                    f"Could not parse property in {fpath}, "
+                    f"line {line_number}:\n{formula}"
+                ) from exc
+
+            properties.extend(parsed)
+
+    return properties
 
 
 def check_property(model: object, property_obj: object) -> object:

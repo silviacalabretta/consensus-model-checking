@@ -9,7 +9,7 @@ def add_model_args(parser: argparse.ArgumentParser) -> None:
         choices=["voter_zealots", "voter_contrarians",
                  "crossinh_zealots", "crossinh_contrarians"],
     )
-    parser.add_argument("--N", type=int, default=10)
+    parser.add_argument("--N", type=int, default=20)
     parser.add_argument("--Za", type=int, default=2)
     parser.add_argument("--Zb", type=int, default=2)
     parser.add_argument("--C", type=int, default=4)

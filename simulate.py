@@ -248,7 +248,8 @@ def run_simulation(
 
     _print_results(results, var_names, max_time, elapsed_sim)
 
-    plot_trajectories(results[0],variables=["a", "b"],shade_labels=True, save_path=f"plots/trajectory_{model_name}_s{seed}.png")
+    # TO DO: save/return results and in case print/plot trajectories
+    # plot_trajectories(results[0],variables=["a", "b"],shade_labels=True, save_path=f"plots/trajectory_{model_name}_s{seed}.png")
 
 
 def main():
