@@ -30,6 +30,7 @@ class ModelCheckResult:
     h: int
 
     build_time: float
+    check_time: float
     nr_states: int
     nr_transitions: int
 
@@ -48,9 +49,9 @@ class ModelCheckResult:
             ),
             (
                 f"Built in {self.build_time:.3f}s — "
-                f"{self.nr_states} states, "
-                f"{self.nr_transitions} transitions"
+                f"{self.nr_states} states, {self.nr_transitions} transitions"
             ),
+            f"Checked all properties in {self.check_time:.3f}s",
             "",
             f"Initial state: {self.initial_state}",
             f"Labels: {self.initial_labels}",
@@ -130,6 +131,8 @@ def run_model_check(
     initial_state = get_initial_state(model)
     initial_labels = sorted(model.labeling.get_labels_of_state(initial_state))
 
+    check_start = time.perf_counter()
+
     probability_results = check_properties(
         property_type="prob",
         model=model,
@@ -143,6 +146,8 @@ def run_model_check(
         prism_program=prism_program,
         initial_state=initial_state,
     )
+    
+    check_time = time.perf_counter() - check_start
 
     return ModelCheckResult(
         model_name=model_name,
@@ -153,6 +158,7 @@ def run_model_check(
         t=t,
         h=h,
         build_time=build_time,
+        check_time=check_time,
         nr_states=model.nr_states,
         nr_transitions=model.nr_transitions,
         initial_state=initial_state,
