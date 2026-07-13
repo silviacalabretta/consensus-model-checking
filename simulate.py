@@ -210,10 +210,8 @@ def run_simulation(
     model_name: str,
     N: int, Za: int, Zb: int, C: int,
     t: int, h: int,
-    n_episodes: int,  max_time: Optional[float], seed: int,
+    n_episodes: int,  max_time: float, seed: int,
 ) -> None:
-    if max_time is None:
-        max_time = float(t)
 
     _validate_simulation_params(t, max_time, n_episodes)
 

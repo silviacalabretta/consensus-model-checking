@@ -34,6 +34,6 @@ def build_simulate_parser() -> argparse.ArgumentParser:
     add_model_args(parser)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--episodes", type=int, default=100)
-    parser.add_argument("--max-time", type=float, default=None,
-                        help="Max simulation time (default: use model's t)")
+    parser.add_argument("--max-time", type=float, default=100,
+                        help="Max simulation time")
     return parser
