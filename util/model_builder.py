@@ -37,9 +37,14 @@ _PROPS_FILES = {
 
 def _substitute_constants(prism_text: str, params: Dict[str, int]) -> str:
     for name, value in params.items():
-        pattern = rf"(const\s+int\s+{name}\s*(?:=\s*[^;]+)?)\s*;"
-        replacement = f"const int {name} = {value};"
-        prism_text = re.sub(pattern, replacement, prism_text)
+        # pattern = rf"(const\s+int\s+{name}\s*(?:=\s*[^;]+)?)\s*;"
+        # replacement = f"const int {name} = {value};"
+        # prism_text = re.sub(pattern, replacement, prism_text)
+        pattern = (rf"(?m)^\s*const\s+int\s+{re.escape(name)}\s*(?:=\s*[^;]+)?\s*;")
+        prism_text, count = re.subn(pattern,f"const int {name} = {value};",prism_text,count=1)
+        if count != 1:
+            raise ValueError(f"Expected exactly one declaration of {name!r}, found {count}")
+        
     return prism_text
 
 
@@ -55,8 +60,12 @@ def _validate_model_params(
     if "zealot" in model_name:
         if Za < 0 or Zb < 0:
             raise ValueError("Za/Zb must be non-negative")
-        if Za > N // 2 or Zb > N // 2:
-            raise ValueError(f"Za/Zb must be <= floor(N/2) for valid initial state (N={N})")
+        a_half = N // 2
+        b_half = N - a_half
+        if Za > a_half:
+            raise ValueError(f"Za must be <= {a_half} for N={N}")
+        if Zb > b_half:
+            raise ValueError(f"Zb must be <= {b_half} for N={N}")
     if "contrarian" in model_name:
         if C < 0:
             raise ValueError("C must be non-negative")

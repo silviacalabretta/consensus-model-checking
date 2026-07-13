@@ -12,7 +12,7 @@ const double qa = 1.05/N;
 const double qb = 0.95/N;
 
 const int m = ceil(0.5 * N);        // majority
-const int d = max(1, floor(N/10));  // difference
+const int d = max(1, ceil(N/10));  // difference
 const int t = 35;       // reaching time
 const int h = 40;       // holding_time
 
