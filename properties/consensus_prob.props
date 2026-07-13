@@ -1,27 +1,27 @@
-// prob of eventually reaching A majority
+// prob of reaching A majority within time t
 P=? [F<=t "maj_a" ]
 
-// prob of eventually reaching B majority
+// prob of reaching B majority within time t
 P=? [F<=t "maj_b" ]
 
-// prob of eventually reaching either majority
+// prob of reaching either majority within time t
 P=? [F<=t "consensus" ]
 
-// prob of never reaching either majority
+// prob of never reaching either majority within time t
 P=? [G<=t !("consensus") ]
 
-// prob of reaching A majority first
+// prob of reaching A majority first within time t
 P=? [!("consensus") U<=t "maj_a" ]
 
-// prob of reaching B majority first
+// prob of reaching B majority first within time t
 P=? [!("consensus") U<=t "maj_b" ]
 
-// prob of reaching A majority and holding it for time h with at least 0.95 prob
+// prob of reaching A majority within time t and holding it for time h with at least 0.95 prob
 P=? [F<=t ("maj_a" & P>=0.95[G<=h "maj_a"])]
 
-// prob of reaching B majority and holding it for time h with at least 0.95 prob
+// prob of reaching B majority within time t and holding it for time h with at least 0.95 prob
 P=? [F<=t ("maj_b" & P>=0.95[G<=h "maj_b"])]
 
-// max prob of reaching B majority in t time after having reached A majority
+// maximum switching probability from any reachable A majority state
 filter(max, P=? [F<=t "maj_b"],"maj_a")
 
