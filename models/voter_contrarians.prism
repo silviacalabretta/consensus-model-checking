@@ -1,24 +1,26 @@
 ctmc
 
-const int N = 10;
-const int Nhalf = floor(N/2);
+const int N = 20;
+const int Ahalf = floor(N/2);
+const int Bhalf = N - Ahalf;    //to manage odd values
 
-const int C = 2;
-const int Chalf = floor(C/2);
+const int C = 4;
+const int Cahalf = floor(C/2);
+const int Cbhalf = C - Cahalf;     //to manage odd values
 
-const double qa = 1.0/N;
-const double qb = 1.0/N;
+const double qa = 1.05/N;
+const double qb = 0.95/N;
 
-const int m = floor(0.5 * N);  // majority
-const int d = 1;        // difference
+const int m = ceil(0.5 * N);        // majority
+const int d = max(1, floor(N/10));  // difference
 const int t = 35;       // reaching time
 const int h = 40;       // holding_time
 
 module voter
-    a : [0..N] init Nhalf-Chalf;
-    b : [0..N] init Nhalf-Chalf;
-	Ca: [0..C] init Chalf;
-	Cb: [0..C] init Chalf;
+    a : [0..N] init Ahalf-Cahalf;
+    b : [0..N] init Bhalf-Cbhalf;
+	Ca: [0..C] init Cahalf;
+	Cb: [0..C] init Cbhalf;
     
     [ra] (a>0) & (b>0) & (a<N) -> qa*a*b : (a'=a+1) & (b'=b-1);    // A + B -> 2A   
     [rb] (a>0) & (b>0) & (b<N) -> qb*a*b : (a'=a-1) & (b'=b+1);    // A + B -> 2B
