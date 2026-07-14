@@ -1,4 +1,6 @@
 plots/**
+results/plots/**
+notes.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
