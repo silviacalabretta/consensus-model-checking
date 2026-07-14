@@ -1,24 +1,26 @@
 // prob of reaching A majority within time t
-P=? [F<=t "maj_a" ]
+"reach_a": P=? [F<=t "maj_a" ];
 
 // prob of reaching B majority within time t
-P=? [F<=t "maj_b" ]
+"reach_b": P=? [F<=t "maj_b" ];
 
 // prob of reaching either majority within time t
-P=? [F<=t "consensus" ]
+"reach_consensus": P=? [F<=t "consensus" ];
 
 // prob of reaching A majority first within time t
-P=? [!("consensus") U<=t "maj_a" ]
+"reach_a_first": P=? [!("consensus") U<=t "maj_a" ];
 
 // prob of reaching B majority first within time t
-P=? [!("consensus") U<=t "maj_b" ]
+"reach_b_first": P=? [!("consensus") U<=t "maj_b" ];
 
 // prob of reaching A majority within time t and holding it for time h with at least 0.95 prob
-P=? [F<=t ("maj_a" & P<=0.05[F<=h !("maj_a")])]
+"reach_robust95_a": P=? [F<=t ("maj_a" & P<=0.05[F<=h !("maj_a")])];
 
 // prob of reaching B majority within time t and holding it for time h with at least 0.95 prob
-P=? [F<=t ("maj_b" & P<=0.05[F<=h !("maj_b")])]
+"reach_robust95_b": P=? [F<=t ("maj_b" & P<=0.05[F<=h !("maj_b")])];
 
-// maximum switching probability from any reachable A majority state
-// filter(max, P=? [F<=t "maj_b"],"maj_a")
+// prob of reaching A majority within time t and holding it for time h with at least 0.99 prob
+"reach_robust99_a": P=? [F<=t ("maj_a" & P<=0.01[F<=h !("maj_a")])];
 
+// prob of reaching B majority within time t and holding it for time h with at least 0.99 prob
+"reach_robust99_b": P=? [F<=t ("maj_b" & P<=0.01[F<=h !("maj_b")])];

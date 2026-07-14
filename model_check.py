@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 
 import time
+import stormpy
 from dataclasses import dataclass
 
 from util.cli_args import build_model_check_parser
 from util.model_builder import (
     build_ctmc,
     parse_properties_file,
-    check_property,
     get_initial_state,
 )
 
 
 @dataclass
 class PropertyResult:
+    name: str
     formula: str
     value: float
     elapsed_time: float
@@ -63,8 +64,7 @@ class ModelCheckResult:
 
         for result in self.probability_results:
             lines.append(
-                f"  {result.formula}  =>  {result.value}  "
-                f"({result.elapsed_time:.3f}s)"
+                f"  {result.name}  =>  {result.value}  ({result.elapsed_time:.3f}s)"
             )
 
         lines.extend([
@@ -76,8 +76,7 @@ class ModelCheckResult:
 
         for result in self.expected_time_results:
             lines.append(
-                f"  {result.formula}  =>  {result.value}  "
-                f"({result.elapsed_time:.3f}s)"
+                f"  {result.formula}  =>  {result.value}  ({result.elapsed_time:.3f}s)"
             )
 
         return "\n".join(lines)
@@ -94,13 +93,15 @@ def check_properties(
     for prop in parse_properties_file(property_type, prism_program):
         start_time = time.perf_counter()
 
-        result = check_property(model, prop)
+        result = stormpy.model_checking(model, prop)
         value = result.at(initial_state)
 
         elapsed_time = time.perf_counter() - start_time
+        prop_name = prop.name if prop.name else str(prop.raw_formula)
 
         results.append(
             PropertyResult(
+                name=prop_name,
                 formula=str(prop.raw_formula),
                 value=float(value),
                 elapsed_time=elapsed_time,

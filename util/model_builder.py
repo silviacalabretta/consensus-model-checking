@@ -134,38 +134,13 @@ def parse_properties_file(prop_key: str, prism_program: object) -> list:
     if not fpath.exists():
         raise FileNotFoundError(f"Properties file not found: {fpath}")
 
-    properties = []
-
     with open(fpath, "r", encoding="utf-8") as file:
-        for line_number, line in enumerate(file, start=1):
-            formula = line.strip()
+        properties_string = file.read()
 
-            # Ignore empty lines and comment lines
-            if not formula or formula.startswith("//"):
-                continue
-
-            # A trailing semicolon is optional when parsing individually,
-            # so remove it for consistency.
-            formula = formula.removesuffix(";").strip()
-
-            try:
-                parsed = stormpy.parse_properties_for_prism_program(
-                    formula,
-                    prism_program,
-                )
-            except RuntimeError as exc:
-                raise RuntimeError(
-                    f"Could not parse property in {fpath}, "
-                    f"line {line_number}:\n{formula}"
-                ) from exc
-
-            properties.extend(parsed)
-
-    return properties
-
-
-def check_property(model: object, property_obj: object) -> object:
-    return stormpy.model_checking(model, property_obj)
+    try:
+        return stormpy.parse_properties_for_prism_program(properties_string, prism_program)
+    except RuntimeError as exc:
+        raise RuntimeError(f"Could not parse properties in {fpath}:\n{exc}") from exc
 
 
 def get_exit_rates(model: object) -> List[float]:
