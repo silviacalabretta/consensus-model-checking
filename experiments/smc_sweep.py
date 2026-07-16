@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import csv
-import math
+import hashlib
 import random
 import time
 from pathlib import Path
@@ -38,8 +38,13 @@ STABLE_LABELS = {"stable_a": "maj_a", "stable_b": "maj_b"}
 
 
 def derive_seed(base_seed: int, config: GridConfig) -> int:
-    return hash((config.model, config.N, config.Za, config.Zb, config.C, base_seed)) & 0xFFFFFFFF
+    value = (
+        f"{base_seed}|{config.model}|{config.N}|"
+        f"{config.Za}|{config.Zb}|{config.C}"
+    ).encode()
 
+    digest = hashlib.blake2s(value, digest_size=4).digest()
+    return int.from_bytes(digest, byteorder="big")
 
 def run_single_config(
     config: GridConfig,

@@ -310,7 +310,14 @@ def simulate_direct_with_monitors(
         if result is None:
             current_time = max_time
             break
-        state, current_time, _ = result
+        next_state, next_time, _ = result
+
+        # The old state and its labels remain active until next_time.
+        for name in stability_monitors:
+            _check_stability_at(name, next_time)
+
+        state = next_state
+        current_time = next_time
 
         labels = compute_labels(params.model_name, state, params)
         _check_state(labels, current_time)
