@@ -8,8 +8,11 @@ const int C = 4;
 const int Cahalf = floor(C/2);
 const int Cbhalf = C - Cahalf;     //to manage odd values
 
-const double qa = 1.05/N;
-const double qb = 0.95/N;
+const double qa = 1.05;
+const double qb = 0.95;
+
+formula rate_a = qa/N;
+formula rate_b = qb/N;
 
 const int m = ceil(0.5 * N);        // majority
 const int d = max(1, ceil(N/10));  // difference
@@ -24,21 +27,21 @@ module cross_inhibition
 	Cb: [0..C] init Cbhalf;
     
     // i=inhibit, r=recruit
-    [ia] (a>0) & (b>0) & (u<N) -> qa*a*b : (b'=b-1) & (u'=u+1);    // A + B -> A + U
-    [ib] (a>0) & (b>0) & (u<N) -> qb*a*b : (a'=a-1) & (u'=u+1);    // A + B -> U + B
-    [ra] (a>0) & (u>0) & (a<N) -> qa*a*u : (a'=a+1) & (u'=u-1);    // U + A -> 2A
-    [rb] (b>0) & (u>0) & (b<N) -> qb*b*u : (b'=b+1) & (u'=u-1);    // U + B -> 2B
+    [ia] (a>0) & (b>0) & (u<N) -> rate_a*a*b : (b'=b-1) & (u'=u+1);    // A + B -> A + U
+    [ib] (a>0) & (b>0) & (u<N) -> rate_b*a*b : (a'=a-1) & (u'=u+1);    // A + B -> U + B
+    [ra] (a>0) & (u>0) & (a<N) -> rate_a*a*u : (a'=a+1) & (u'=u-1);    // U + A -> 2A
+    [rb] (b>0) & (u>0) & (b<N) -> rate_b*b*u : (b'=b+1) & (u'=u-1);    // U + B -> 2B
 
     // Contrarians interactions: f=flip
-    [conia] (a>0) & (Cb>0) & (u<N) -> qb*a*Cb : (a'=a-1) & (u'=u+1);       // A + Cb -> U + Cb
-    [conrb] (u>0) & (Cb>0) & (b<N) -> qb*u*Cb : (u'=u-1) & (b'=b+1);       // U + Cb -> B + Cb
-    [confb] (a>0) & (Ca>0) & (Cb<C) -> qa*a*Ca : (Ca'=Ca-1) & (Cb'=Cb+1);  // A + Ca -> A + Cb
-    [conib] (b>0) & (Ca>0) & (u<N) -> qa*b*Ca : (b'=b-1) & (u'=u+1);       // B + Ca -> U + Ca
-    [conra] (u>0) & (Ca>0) & (a<N) -> qa*u*Ca : (u'=u-1) & (a'=a+1);       // U + Ca -> A + Ca  
-    [confa] (b>0) & (Cb>0) & (Ca<C) -> qb*b*Cb : (Cb'=Cb-1) & (Ca'=Ca+1);  // B + Cb -> B + Ca
+    [conia] (a>0) & (Cb>0) & (u<N) -> rate_b*a*Cb : (a'=a-1) & (u'=u+1);       // A + Cb -> U + Cb
+    [conrb] (u>0) & (Cb>0) & (b<N) -> rate_b*u*Cb : (u'=u-1) & (b'=b+1);       // U + Cb -> B + Cb
+    [confb] (a>0) & (Ca>0) & (Cb<C) -> rate_a*a*Ca : (Ca'=Ca-1) & (Cb'=Cb+1);  // A + Ca -> A + Cb
+    [conib] (b>0) & (Ca>0) & (u<N) -> rate_a*b*Ca : (b'=b-1) & (u'=u+1);       // B + Ca -> U + Ca
+    [conra] (u>0) & (Ca>0) & (a<N) -> rate_a*u*Ca : (u'=u-1) & (a'=a+1);       // U + Ca -> A + Ca  
+    [confa] (b>0) & (Cb>0) & (Ca<C) -> rate_b*b*Cb : (Cb'=Cb-1) & (Ca'=Ca+1);  // B + Cb -> B + Ca
 
-    [confbb] (Ca>1) & (Cb<(C-1)) -> qa*Ca*(Ca-1)/2 : (Ca'=Ca-2) & (Cb'=Cb+2);  // Ca + Ca -> Cb + Cb
-    [confaa] (Cb>1) & (Ca<(C-1)) -> qb*Cb*(Cb-1)/2 : (Cb'=Cb-2) & (Ca'=Ca+2);  // Cb + Cb -> Ca + Ca
+    [confbb] (Ca>1) & (Cb<(C-1)) -> rate_a*Ca*(Ca-1)/2 : (Ca'=Ca-2) & (Cb'=Cb+2);  // Ca + Ca -> Cb + Cb
+    [confaa] (Cb>1) & (Ca<(C-1)) -> rate_b*Cb*(Cb-1)/2 : (Cb'=Cb-2) & (Ca'=Ca+2);  // Cb + Cb -> Ca + Ca
 
 endmodule
 

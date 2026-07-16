@@ -1,0 +1,20 @@
+[project]
+name = "consensus-model-checking"
+version = "0.1.0"
+description = "CTMC model checking and Gillespie simulation for consensus in finite populations"
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "stormpy>=1.13",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.1",
+]
+
+[tool.setuptools.packages.find]
+include = ["src*"]

@@ -1,6 +1,7 @@
 import pytest
 
-from util.model_builder import build_ctmc, get_state_variables
+from src.model import build_ctmc, get_state_variables
+from src.types import ModelParams
 
 
 ZEALOT_MODELS = [
@@ -22,23 +23,11 @@ def test_zealot_population_is_conserved(model_name: str) -> None:
     Za = 1
     Zb = 1
 
-    built_model = build_ctmc(
-        model_name=model_name,
-        N=N,
-        Za=Za,
-        Zb=Zb,
-        C=0,
-        t=5,
-        h=3,
-    )
-
+    params = ModelParams(model_name=model_name, N=N, Za=Za, Zb=Zb, C=0, t=5, h=3)
+    built_model = build_ctmc(params)
     model = built_model.model
 
-    _, values = get_state_variables(
-        model,
-        built_model.prism_program,
-        model_name,
-    )
+    _, values = get_state_variables(model, built_model.prism_program, model_name)
 
     for state in range(model.nr_states):
         total = (
@@ -47,7 +36,6 @@ def test_zealot_population_is_conserved(model_name: str) -> None:
             + Za
             + Zb
         )
-
         if "u" in values:
             total += int(values["u"][state])
 
@@ -59,29 +47,15 @@ def test_zealot_population_is_conserved(model_name: str) -> None:
 
 
 @pytest.mark.parametrize("model_name", CONTRARIAN_MODELS)
-def test_contrarian_population_is_conserved(
-    model_name: str,
-) -> None:
+def test_contrarian_population_is_conserved(model_name: str) -> None:
     N = 6
     C = 2
 
-    built_model = build_ctmc(
-        model_name=model_name,
-        N=N,
-        Za=0,
-        Zb=0,
-        C=C,
-        t=5,
-        h=3,
-    )
-
+    params = ModelParams(model_name=model_name, N=N, Za=0, Zb=0, C=C, t=5, h=3)
+    built_model = build_ctmc(params)
     model = built_model.model
 
-    _, values = get_state_variables(
-        model,
-        built_model.prism_program,
-        model_name,
-    )
+    _, values = get_state_variables(model, built_model.prism_program, model_name)
 
     for state in range(model.nr_states):
         ca = int(values["Ca"][state])
@@ -93,7 +67,6 @@ def test_contrarian_population_is_conserved(
             + ca
             + cb
         )
-
         if "u" in values:
             total += int(values["u"][state])
 
@@ -111,57 +84,28 @@ def test_contrarian_population_is_conserved(
 
 
 @pytest.mark.parametrize("model_name", ALL_MODELS)
-def test_majority_labels_are_mutually_exclusive(
-    model_name: str,
-) -> None:
-    built_model = build_ctmc(
-        model_name=model_name,
-        N=6,
-        Za=1,
-        Zb=1,
-        C=2,
-        t=5,
-        h=3,
-    )
-
+def test_majority_labels_are_mutually_exclusive(model_name: str) -> None:
+    params = ModelParams(model_name=model_name, N=6, Za=1, Zb=1, C=2, t=5, h=3)
+    built_model = build_ctmc(params)
     model = built_model.model
 
     for state in range(model.nr_states):
-        labels = set(
-            model.labeling.get_labels_of_state(state)
-        )
-
-        assert not (
-            "maj_a" in labels
-            and "maj_b" in labels
-        ), (
-            f"State {state} in {model_name} is labelled "
-            "both maj_a and maj_b"
+        labels = set(model.labeling.get_labels_of_state(state))
+        assert not ("maj_a" in labels and "maj_b" in labels), (
+            f"State {state} in {model_name} is labelled both maj_a and maj_b"
         )
 
 
 @pytest.mark.parametrize("model_name", ALL_MODELS)
-def test_transition_rates_are_non_negative(
-    model_name: str,
-) -> None:
-    built_model = build_ctmc(
-        model_name=model_name,
-        N=6,
-        Za=1,
-        Zb=1,
-        C=2,
-        t=5,
-        h=3,
-    )
-
+def test_transition_rates_are_non_negative(model_name: str) -> None:
+    params = ModelParams(model_name=model_name, N=6, Za=1, Zb=1, C=2, t=5, h=3)
+    built_model = build_ctmc(params)
     model = built_model.model
     transition_matrix = model.transition_matrix
 
     for state in range(model.nr_states):
         for entry in transition_matrix.get_row(state):
             rate = float(entry.value())
-
             assert rate >= 0.0, (
-                f"Negative rate {rate} in "
-                f"{model_name}, state {state}"
+                f"Negative rate {rate} in {model_name}, state {state}"
             )

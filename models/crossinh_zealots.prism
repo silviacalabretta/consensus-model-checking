@@ -7,8 +7,11 @@ const int Bhalf = N - Ahalf;    //to manage odd values
 const int Za = 2;
 const int Zb = 2;
 
-const double qa = 1.05/N;
-const double qb = 0.95/N;
+const double qa = 1.05;
+const double qb = 0.95;
+
+formula rate_a = qa/N;
+formula rate_b = qb/N;
 
 const int m = ceil(0.5 * N);        // majority
 const int d = max(1, ceil(N/10));  // difference
@@ -21,16 +24,16 @@ module cross_inhibition
     u : [0..N] init 0;
     
     // i=inhibit, r=recruit
-    [ia] (a>0) & (b>0) & (u<N) -> qa*a*b : (b'=b-1) & (u'=u+1);    // A + B -> A + U
-    [ib] (a>0) & (b>0) & (u<N) -> qb*a*b : (a'=a-1) & (u'=u+1);    // A + B -> U + B
-    [ra] (a>0) & (u>0) & (a<N) -> qa*a*u : (a'=a+1) & (u'=u-1);    // U + A -> 2A
-    [rb] (b>0) & (u>0) & (b<N) -> qb*b*u : (b'=b+1) & (u'=u-1);    // U + B -> 2B
+    [ia] (a>0) & (b>0) & (u<N) -> rate_a*a*b : (b'=b-1) & (u'=u+1);    // A + B -> A + U
+    [ib] (a>0) & (b>0) & (u<N) -> rate_b*a*b : (a'=a-1) & (u'=u+1);    // A + B -> U + B
+    [ra] (a>0) & (u>0) & (a<N) -> rate_a*a*u : (a'=a+1) & (u'=u-1);    // U + A -> 2A
+    [rb] (b>0) & (u>0) & (b<N) -> rate_b*b*u : (b'=b+1) & (u'=u-1);    // U + B -> 2B
 
     // Zealot interactions
-    [zia] (a>0) & (Zb>0) & (u<N) -> qb*a*Zb : (a'=a-1) & (u'=u+1);  // A + Zb -> U + Zb
-    [zrb] (u>0) & (Zb>0) & (b<N) -> qb*u*Zb : (u'=u-1) & (b'=b+1);  // U + Zb -> B + Zb
-    [zib] (b>0) & (Za>0) & (u<N) -> qa*b*Za : (b'=b-1) & (u'=u+1);  // B + Za -> U + Za
-    [zra] (u>0) & (Za>0) & (a<N) -> qa*u*Za : (u'=u-1) & (a'=a+1);  // U + Za -> A + Za 
+    [zia] (a>0) & (Zb>0) & (u<N) -> rate_b*a*Zb : (a'=a-1) & (u'=u+1);  // A + Zb -> U + Zb
+    [zrb] (u>0) & (Zb>0) & (b<N) -> rate_b*u*Zb : (u'=u-1) & (b'=b+1);  // U + Zb -> B + Zb
+    [zib] (b>0) & (Za>0) & (u<N) -> rate_a*b*Za : (b'=b-1) & (u'=u+1);  // B + Za -> U + Za
+    [zra] (u>0) & (Za>0) & (a<N) -> rate_a*u*Za : (u'=u-1) & (a'=a+1);  // U + Za -> A + Za 
 
 endmodule
 

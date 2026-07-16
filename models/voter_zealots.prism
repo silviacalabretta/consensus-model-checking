@@ -7,8 +7,11 @@ const int Bhalf = N - Ahalf;    //to manage odd values
 const int Za = 2;
 const int Zb = 2;
 
-const double qa = 1.05/N;
-const double qb = 0.95/N;
+const double qa = 1.05;
+const double qb = 0.95;
+
+formula rate_a = qa/N;
+formula rate_b = qb/N;
 
 const int m = ceil(0.5 * N);        // majority
 const int d = max(1, ceil(N/10));  // difference
@@ -19,12 +22,12 @@ module voter
     a : [0..N] init Ahalf-Za;
     b : [0..N] init Bhalf-Zb;
     
-    [ra] (a>0) & (b>0) & (a<N) -> qa*a*b : (a'=a+1) & (b'=b-1);    // A + B -> 2A   
-    [rb] (a>0) & (b>0) & (b<N) -> qb*a*b : (a'=a-1) & (b'=b+1);    // A + B -> 2B
+    [ra] (a>0) & (b>0) & (a<N) -> rate_a*a*b : (a'=a+1) & (b'=b-1);    // A + B -> 2A   
+    [rb] (a>0) & (b>0) & (b<N) -> rate_b*a*b : (a'=a-1) & (b'=b+1);    // A + B -> 2B
 
     // Zealot interactions
-    [za] (b>0) & (a<N) & (Za>0) -> qa*b*Za : (a'=a+1) & (b'=b-1);  // B + Za -> A + Za
-    [zb] (a>0) & (b<N) & (Zb>0) -> qb*a*Zb : (a'=a-1) & (b'=b+1);  // A + Zb -> B + Zb
+    [za] (b>0) & (a<N) & (Za>0) -> rate_a*b*Za : (a'=a+1) & (b'=b-1);  // B + Za -> A + Za
+    [zb] (a>0) & (b<N) & (Zb>0) -> rate_b*a*Zb : (a'=a-1) & (b'=b+1);  // A + Zb -> B + Zb
 
 endmodule
 
