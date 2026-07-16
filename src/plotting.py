@@ -10,13 +10,6 @@ import pandas as pd
 
 from src.types import EpisodeResult
 
-ALL_MODELS = (
-    "voter_zealots",
-    "voter_contrarians",
-    "crossinh_zealots",
-    "crossinh_contrarians",
-)
-
 MODEL_LABELS = {
     "voter_zealots": "Voter + zealots",
     "voter_contrarians": "Voter + contrarians",

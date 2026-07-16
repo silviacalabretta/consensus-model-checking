@@ -8,7 +8,7 @@ from typing import List
 from tqdm import tqdm
 
 from src.cli import build_simulate_parser, resolve_model_args
-from src.gillespie import simulate_episode
+from src.gillespie_storm import simulate_episode
 from src.model import build_simulation_context
 from src.plotting import plot_trajectories
 from src.types import EpisodeResult, ModelParams

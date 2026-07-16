@@ -2,14 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-
-ALL_MODELS = (
-    "voter_zealots",
-    "voter_contrarians",
-    "crossinh_zealots",
-    "crossinh_contrarians",
-)
-
+from src.model import ALL_MODELS
 
 def add_model_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
@@ -117,4 +110,11 @@ def build_experiment_parser(
 def build_plot_parser(description: str) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=description)
     add_plot_args(parser)
+    return parser
+
+
+def build_sweep_parser(description: str, default_episodes: int = 1000) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=description)
+    parser.set_defaults(episodes=default_episodes)
+    add_experiment_args(parser)
     return parser

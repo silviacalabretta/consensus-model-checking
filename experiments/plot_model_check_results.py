@@ -7,8 +7,8 @@ import numpy as np
 from matplotlib.colors import LogNorm, Normalize
 
 from src.cli import build_plot_parser
+from src.model import ALL_MODELS
 from src.plotting import (
-    ALL_MODELS,
     MODEL_LABELS,
     SCALABILITY_METRICS,
     format_grid_axis,
