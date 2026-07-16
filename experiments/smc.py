@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from src.cli import build_experiment_parser, resolve_model_args
 from src.estimation import wilson_interval
-from src.gillespie import simulate_episode
+from src.gillespie_storm import simulate_episode
 from src.model import build_simulation_context
 from src.monitors import reaches_and_holds
 from src.types import ModelParams
