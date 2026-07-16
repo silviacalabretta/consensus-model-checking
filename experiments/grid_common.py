@@ -87,5 +87,6 @@ def read_existing_csv(output_path: Path) -> tuple[list[str] | None, set[tuple[st
         fields = list(reader.fieldnames) if reader.fieldnames else None
         keys = {
             tuple(row[field] for field in CONFIG_KEY_FIELDS) for row in reader
+            if row.get("status") == "ok"
         }
     return fields, keys

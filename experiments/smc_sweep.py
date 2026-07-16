@@ -9,10 +9,9 @@ from pathlib import Path
 from tqdm import tqdm
 
 from src.model import ALL_MODELS
-from src.cli import build_sweep_parser, resolve_model_args
+from src.cli import build_sweep_parser
 from src.gillespie_py import simulate_direct_with_monitors
 from src.estimation import wilson_interval
-from src.types import ModelParams
 
 from experiments.grid_common import GridConfig, generate_configs, read_existing_csv
 
@@ -30,26 +29,40 @@ CSV_FIELDS = (
     "stable_a", "stable_a_ci_lo", "stable_a_ci_hi",
     "stable_b", "stable_b_ci_lo", "stable_b_ci_hi",
     "stable_consensus", "stable_consensus_ci_lo", "stable_consensus_ci_hi",
+    "reach_a", "reach_a_ci_lo", "reach_a_ci_hi",
+    "reach_b", "reach_b_ci_lo", "reach_b_ci_hi",
     "reach_consensus", "reach_consensus_ci_lo", "reach_consensus_ci_hi",
-    "episodes", "total_time", "status", "error",
+    "episodes", "confidence", "base_seed", "config_seed",
+    "total_time", "status", "error",
 )
 
 STABLE_LABELS = {"stable_a": "maj_a", "stable_b": "maj_b"}
+REACH_LABELS = {
+    "reach_a": "maj_a",
+    "reach_b": "maj_b",
+    "reach_consensus": "consensus",
+}
+PROPERTIES = (
+    "stable_a",
+    "stable_b",
+    "stable_consensus",
+    "reach_a",
+    "reach_b",
+    "reach_consensus",
+)
+
 
 
 def derive_seed(base_seed: int, config: GridConfig) -> int:
-    value = (
-        f"{base_seed}|{config.model}|{config.N}|"
-        f"{config.Za}|{config.Zb}|{config.C}"
-    ).encode()
-
-    digest = hashlib.blake2s(value, digest_size=4).digest()
+    payload = "|".join((str(base_seed), *config.key())).encode()
+    digest = hashlib.blake2s(payload, digest_size=8).digest()
     return int.from_bytes(digest, byteorder="big")
 
 def run_single_config(
     config: GridConfig,
     episodes: int,
     seed: int,
+    confidence: float,
     show_progress: bool,
 ) -> dict[str, object]:
     params = config.to_model_params()
@@ -59,6 +72,8 @@ def run_single_config(
         "stable_a": 0,
         "stable_b": 0,
         "stable_consensus": 0,
+        "reach_a": 0,
+        "reach_b": 0,
         "reach_consensus": 0,
     }
 
@@ -67,19 +82,22 @@ def run_single_config(
         iterator = tqdm(iterator, unit="ep", leave=False, ncols=80)
 
     start = time.perf_counter()
-
+    stability_monitors={
+        name: (label, params.t, params.h) 
+        for name, label in STABLE_LABELS.items()
+    }
+    reach_monitors={
+        name: (label, params.t) 
+        for name, label in REACH_LABELS.items()
+    }
+    
     for _ in iterator:
         results = simulate_direct_with_monitors(
             params,
             rng,
             params.t + params.h,
-            stability_monitors={
-                "stable_a": ("maj_a", params.t, params.h),
-                "stable_b": ("maj_b", params.t, params.h),
-            },
-            reach_monitors={
-                "reach_consensus": ("consensus", params.t),
-            },
+            stability_monitors=stability_monitors,
+            reach_monitors=reach_monitors,
         )
 
         if results["stable_a"]:
@@ -88,8 +106,9 @@ def run_single_config(
             successes["stable_b"] += 1
         if results["stable_a"] or results["stable_b"]:
             successes["stable_consensus"] += 1
-        if results["reach_consensus"]:
-            successes["reach_consensus"] += 1
+        for name in REACH_LABELS:
+            if results[name]:
+                successes[name] += 1
 
     elapsed = time.perf_counter() - start
 
@@ -106,14 +125,15 @@ def run_single_config(
         "qa": config.qa,
         "qb": config.qb,
         "episodes": episodes,
+        "confidence": confidence,
         "total_time": elapsed,
         "status": "ok",
         "error": "",
     }
 
-    for prop in ("stable_a", "stable_b", "stable_consensus", "reach_consensus"):
+    for prop in PROPERTIES:
         s = successes[prop]
-        lo, hi = wilson_interval(s, episodes, 0.99)
+        lo, hi = wilson_interval(s, episodes, confidence)
         row[prop] = s / episodes
         row[f"{prop}_ci_lo"] = lo
         row[f"{prop}_ci_hi"] = hi
@@ -161,14 +181,17 @@ def run_grid(configs: list[GridConfig], args, output_path: Path, overwrite: bool
             )
 
             t0 = time.perf_counter()
+            seed = derive_seed(args.seed, config)
             try:
-                seed = derive_seed(args.seed, config)
                 row = run_single_config(
                     config=config,
                     episodes=args.episodes,
                     seed=seed,
+                    confidence=args.confidence,
                     show_progress=not args.no_progress,
                 )
+                row["base_seed"] = args.seed
+                row["config_seed"] = seed
                 print(
                     f"  ok: stable_a={row['stable_a']:.4f}, "
                     f"stable_b={row['stable_b']:.4f}, "
@@ -192,6 +215,9 @@ def run_grid(configs: list[GridConfig], args, output_path: Path, overwrite: bool
                     "qa": config.qa,
                     "qb": config.qb,
                     "episodes": args.episodes,
+                    "confidence": args.confidence,
+                    "base_seed": args.seed,
+                    "config_seed": seed,
                     "total_time": total_time,
                     "status": "error",
                     "error": f"{type(error).__name__}: {' '.join(str(error).splitlines())}",
@@ -211,7 +237,11 @@ def main() -> None:
         help="Overwrite existing CSV",
     )
     args = parser.parse_args()
-    args = resolve_model_args(args)
+    if args.episodes <= 0:
+        raise ValueError("episodes must be positive")
+
+    if not 0.0 < args.confidence < 1.0:
+        raise ValueError("confidence must be between 0 and 1")
 
     configs = generate_configs(
         models=list(ALL_MODELS),
