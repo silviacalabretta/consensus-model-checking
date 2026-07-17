@@ -13,7 +13,7 @@ from src.cli import build_sweep_parser
 from src.gillespie_py import simulate_direct_with_monitors
 from src.estimation import wilson_interval
 
-from experiments.grid_common import GridConfig, generate_configs, read_existing_csv
+from grid_common import GridConfig, generate_configs, read_existing_csv
 
 
 T = 35
