@@ -148,5 +148,5 @@ pytest tests/
 
 ## References
 
-[1] J. Klein and T. Petrov, "Quantifying consensus in stochastic swarms with disruptive individuals," 2025 European Control Conference (ECC), Thessaloniki, Greece, 2025, pp. 272-277, doi: 10.23919/ECC65951.2025.11186823.
+[1] J. Klein and T. Petrov, "Quantifying consensus in stochastic swarms with disruptive individuals," 2025 European Control Conference (ECC), Thessaloniki, Greece, 2025, pp. 272-277, doi: 10.23919/ECC65951.2025.11186823.  
 [2] Luca Bortolussi, Jane Hillston, Diego Latella, Mieke Massink, Continuous approximation of collective system behaviour: A tutorial, Performance Evaluation, Volume 70, Issue 5, 2013, Pages 317-349, ISSN 0166-5316, https://doi.org/10.1016/j.peva.2013.01.001.
